@@ -1,24 +1,48 @@
 // external import
 const mongoose = require("mongoose");
 
-// schema structure
-const quizSchema = mongoose.Schema(
+// option schema structure
+const optionSchema = new mongoose.Schema({
+  value: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: [40, "Value cannot exceed 40 characters"],
+  },
+  isCorrect: {
+    type: Boolean,
+    required: true,
+    enum: [true, false],
+  },
+});
+
+// quiz schema structure
+const quizSchema = new mongoose.Schema(
   {
-    title: {
+    question: {
       type: String,
       required: true,
       trim: true,
+      maxlength: [100, "Question cannot exceed 100 characters"],
     },
-    imgLink: {
-      type: String,
+    isMultiple: {
+      type: Boolean,
       required: true,
-      trim: true,
+      enum: [true, false],
+    },
+    options: {
+      type: [optionSchema],
+      required: true,
+      validate: [
+        (val) => val.length === 4,
+        "Must have four options, no more no less",
+      ],
     },
   },
   { timestamps: true }
 );
 
-// quizzes model
-const QuizModel = new mongoose.model("Topic", quizSchema);
+//  quiz model
+const QuizModel = mongoose.model("Topic", quizSchema);
 
 module.exports = QuizModel;

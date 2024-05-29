@@ -5,6 +5,7 @@ const dotenv = require("dotenv");
 // config env file
 dotenv.config();
 
+// configuring firebase
 const firebaseConfig = {
   apiKey: process.env.API_KEY,
   authDomain: process.env.AUTH_DOMAIN,
@@ -14,6 +15,7 @@ const firebaseConfig = {
   appId: process.env.APP_ID,
 };
 
+// firebase initialization
 const firebase = initializeApp(firebaseConfig);
 
 module.exports = firebase;

@@ -4,30 +4,13 @@ const multer = require("multer");
 const path = require("path");
 
 // internal import
-require("../../firebase");
-const firebaseFileUpload = require("../../lib/firebaseFileUpload");
+require("../firebase");
+const firebaseFileUpload = require("../lib/firebaseFileUpload");
 
 // router setup
 const router = express.Router();
 
-// const uploadDestination = path.join(__dirname, "../../uploads/");
-
-// filename
-// const storage = multer.diskStorage({
-//   destination: (req, file, cb) => {
-//     cb(null, uploadDestination);
-//   },
-//   filename: (req, file, cb) => {
-//     const ext = path.extname(file.originalname);
-//     const name =
-//       file.originalname.replace(ext, "").toLowerCase().split(" ").join("-") +
-//       "-" +
-//       Date.now();
-
-//     cb(null, name + ext);
-//   },
-// });
-
+// multer storage
 const storage = multer.memoryStorage();
 
 // multer file upload configuration
@@ -70,9 +53,10 @@ router.post("/", upload.single("quiz-image"), async (req, res, next) => {
     type: req.file.mimetype,
   });
 
-  const imgLink = await firebaseFileUpload(fileobject, modifiedName);
+  const img_link = await firebaseFileUpload(fileobject, modifiedName);
 
-  req.imgLink = imgLink;
+  req.img_link = img_link;
+  req.img_ref = modifiedName;
   next();
 });
 
