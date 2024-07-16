@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 
 // internal import
 const LeaderboardModel = require("../models/leaderboardModel");
+const QuizTopicModel = require("../models/quizTopicModel");
 // const lockMiddleware = require("../middlewares/lockMiddleware");
 
 // router setup
@@ -12,13 +13,13 @@ const router = express.Router();
 // get all the top scorers
 router.get("/:leaderboard_name", async (req, res) => {
   try {
-    const paramsName = req.params.leaderboard_name;
+    const paramsValue = req.params.leaderboard_name;
 
     const leaderboard = await LeaderboardModel.findOne({
-      leaderboardName: paramsName,
+      leaderboardName: paramsValue,
     });
 
-    if (leaderboard?.leaderboardName === paramsName) {
+    if (leaderboard?.leaderboardName === paramsValue) {
       res.status(200).json({ data: leaderboard });
     } else {
       res.status(409).json({
@@ -36,37 +37,71 @@ router.get("/:leaderboard_name", async (req, res) => {
 // post new leaderboard
 router.post("/:leaderboard_name", async (req, res) => {
   try {
-    const paramsName = req.params.leaderboard_name;
-
-    const leaderboard = await LeaderboardModel.findOne({
-      leaderboardName: paramsName,
-    });
-
-    let data = {
-      // leaderboardName: paramsName,
-      topScorer: req.body.payload,
+    // const paramsValue = req.params.leaderboard_name;
+    // extra space remover function
+    const removeExtraSpaces = (str) => {
+      return str
+        .trim()
+        .split(" ")
+        .filter((word) => word.length > 0)
+        .join(" ");
     };
 
+    // checking if the topic exist or not
+    const regexParamsValue = new RegExp(
+      `^${req.params.leaderboard_name}$`,
+      "i"
+    );
+    const isTopicExist = await QuizTopicModel.findOne({
+      title: regexParamsValue,
+    });
+
+    const leaderboard = await LeaderboardModel.findOne({
+      leaderboardName: isTopicExist.title,
+    });
+
+    // let data = {
+
+    // };
+    const playerQuizResult = req.body.payload;
+
     if (
-      (leaderboard === null || !leaderboard?.leaderboardName === paramsName) &&
-      data?.topScorer?.length > 0
+      (leaderboard === null ||
+        !leaderboard?.leaderboardName === regexParamsValue) &&
+      playerQuizResult.userName
     ) {
-      data.leaderboardName = paramsName;
+      const data = {
+        leaderboardName: isTopicExist.title,
+        topScorer: [playerQuizResult],
+      };
+
+      // data.leaderboardName = regexParamsValue;
 
       const new_top_scorer = new LeaderboardModel(data);
       await new_top_scorer.save();
 
       res.status(200).json({ data: new_top_scorer });
     } else if (
-      leaderboard?.leaderboardName === paramsName &&
-      data?.topScorer?.length > 0 &&
-      data?.topScorer?.length <= 7
+      leaderboard?.leaderboardName === isTopicExist.title &&
+      playerQuizResult.userName
     ) {
+      // analyse if the player made it into the top seven
+      const topSeven = [...leaderboard.topScorer, playerQuizResult]
+        .sort((a, b) => {
+          if (a.obtainedScore !== b.obtainedScore) {
+            return b.obtainedScore - a.obtainedScore;
+          } else if (a.timeRequired !== b.timeRequired) {
+            return a.timeRequired - b.timeRequired;
+          }
+          return a.createdAt - b.createdAt;
+        })
+        .slice(0, 7);
+
       const updated_data = await LeaderboardModel.findOneAndUpdate(
         {
-          leaderboardName: paramsName,
+          leaderboardName: leaderboard.leaderboardName,
         },
-        { topScorer: data.topScorer },
+        { topScorer: topSeven },
         { returnDocument: "after" }
       );
 
@@ -87,15 +122,15 @@ router.post("/:leaderboard_name", async (req, res) => {
 // unused
 router.put("/:leaderboard_name", async (req, res) => {
   // try {
-  //   const paramsName = req.params.leaderboard_name;
+  //   const paramsValue = req.params.leaderboard_name;
   //   const leaderboard = await LeaderboardModel.findOne({
-  //     leaderboardName: paramsName,
+  //     leaderboardName: paramsValue,
   //   });
   //   const data = [...req.body.topScorer];
-  //   if (leaderboard?.leaderboardName === paramsName && data?.length) {
+  //   if (leaderboard?.leaderboardName === paramsValue && data?.length) {
   //     const updated_data = await LeaderboardModel.findOneAndUpdate(
   //       {
-  //         leaderboardName: paramsName,
+  //         leaderboardName: paramsValue,
   //       },
   //       { topScorer: data },
   //       { returnDocument: "after" }

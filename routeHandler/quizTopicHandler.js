@@ -37,6 +37,37 @@ router.get("/", async (req, res) => {
 // post a quiz topic
 router.post("/", topicDataValidator, async (req, res) => {
   try {
+    // extra space remover function
+    const removeExtraSpaces = (str) => {
+      return str
+        .trim()
+        .split(" ")
+        .filter((word) => word.length > 0)
+        .join(" ");
+    };
+
+    // checking if the topic already exist or not
+    const regexParamsValue = new RegExp(
+      `^${removeExtraSpaces(req.body.title)}$`,
+      "i"
+    );
+    const isTopicExist = await QuizTopicModel.findOne({
+      title: regexParamsValue,
+    });
+
+    if (isTopicExist) {
+      return res.status(409).json({
+        message: "This quiz topic is already exist. Try another topic",
+      });
+    }
+
+    // checking if an image file exist or not
+    if (!req.body.img_object || !req.body.img_ref) {
+      return res.status(409).json({
+        message: "No image file exist. please upload one",
+      });
+    }
+
     const img_link = await firebaseFileUpload(
       req.body.img_object,
       req.body.img_ref
@@ -56,7 +87,9 @@ router.post("/", topicDataValidator, async (req, res) => {
     });
   } catch (err) {
     // delete image from firebase
-    firebaseFileDelete(req.body.img_ref);
+    if (req.body.img_ref) {
+      await firebaseFileDelete(req.body.img_ref);
+    }
 
     res.status(500).json({
       message: "there was an error",
@@ -65,21 +98,68 @@ router.post("/", topicDataValidator, async (req, res) => {
 });
 
 // update a quiz topic
-// unused
-router.put("/:id", topicDataValidator, async (req, res) => {
+router.put("/", topicDataValidator, async (req, res) => {
   try {
-    const data = {
-      title: req.body.title,
-      description: req.body.description,
-      img_link: req.body.img_link,
-      img_ref: req.body.img_ref,
+    // extra space remover function
+    const removeExtraSpaces = (str) => {
+      return str
+        .trim()
+        .split(" ")
+        .filter((word) => word.length > 0)
+        .join(" ");
     };
+
+    // checking if the topic already exist or not
+    const isTopicExist = await QuizTopicModel.findOne({
+      _id: req.body.id,
+    });
+
+    if (!isTopicExist) {
+      return res.status(409).json({
+        message: "Invalid ID. Can't find the corresponding topic.",
+      });
+    }
+
+    let data = {
+      title: removeExtraSpaces(req.body.title),
+      description: req.body.description,
+    };
+
+    if (req.body.img_object && req.body.img_ref) {
+      // delete the existing image file
+      await firebaseFileDelete(isTopicExist.img_ref);
+
+      // upload the new image
+      const new_img_link = await firebaseFileUpload(
+        req.body.img_object,
+        req.body.img_ref
+      );
+
+      data = {
+        ...data,
+        img_link: new_img_link,
+        img_ref: req.body.img_ref,
+      };
+    } else {
+      data = {
+        ...data,
+        img_link: isTopicExist.img_link,
+        img_ref: isTopicExist.img_ref,
+      };
+    }
+
+    // const data = {
+    //   title: removeExtraSpaces(req.body.title),
+    //   description: req.body.description,
+    //   img_link: isTopicExist.img_link,
+    //   img_ref: isTopicExist.img_ref,
+    // };
     const topic = await QuizTopicModel.findByIdAndUpdate(
-      req.params.id,
+      req.body.id,
       {
-        title: "Random 9",
+        ...data,
       },
-      { new: true }
+      { returnDocument: "after" }
     );
 
     res.status(200).json({
@@ -93,7 +173,6 @@ router.put("/:id", topicDataValidator, async (req, res) => {
 });
 
 // delete a quiz topic
-// unused
 router.delete("/", async (req, res) => {
   try {
     const data = {
@@ -110,10 +189,10 @@ router.delete("/", async (req, res) => {
       });
 
       // delete image from firebase
-      firebaseFileDelete(img_ref);
+      await firebaseFileDelete(img_ref);
 
       res.status(200).json({
-        data: img_ref,
+        data: data.id,
       });
     } else {
       res.status(409).json({

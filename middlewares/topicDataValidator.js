@@ -35,31 +35,40 @@ function topicDataValidator(req, res, next) {
           message: "there was an upload error",
         });
       } else {
-        // modifying the image name
-        const ext = path.extname(req.file.originalname);
-        const modifiedName =
-          req.file.originalname
-            .replace(ext, "")
-            .toLowerCase()
-            .split(" ")
-            .join("-") +
-          "-" +
-          Date.now() +
-          ext;
+        // checking if file exist or not
+        if (req.file) {
+          // modifying the image name
+          const ext = path.extname(req.file.originalname);
+          const modifiedName =
+            req.file.originalname
+              .replace(ext, "")
+              .toLowerCase()
+              .split(" ")
+              .join("-") +
+            "-" +
+            Date.now() +
+            ext;
 
-        // reciving the image buffer
-        const img_buffer = req.file.buffer;
+          // reciving the image buffer
+          const img_buffer = req.file.buffer;
 
-        // create the image from buffer
-        const img_object = new File([img_buffer], req.file.originalname, {
-          type: req.file.mimetype,
-        });
+          // create the image from buffer
+          const img_object = new File([img_buffer], req.file.originalname, {
+            type: req.file.mimetype,
+          });
 
-        // sending the necessary data to the next middleware
-        req.body.img_object = img_object;
-        req.body.img_ref = modifiedName;
+          // sending the necessary data to the next middleware
+          req.body.img_object = img_object;
+          req.body.img_ref = modifiedName;
 
-        next();
+          next();
+        } else {
+          // sending the necessary data to the next middleware
+          req.body.img_object = null;
+          req.body.img_ref = null;
+
+          next();
+        }
       }
     } else {
       res.status(409).json({
