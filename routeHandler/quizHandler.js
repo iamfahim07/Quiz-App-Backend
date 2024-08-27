@@ -6,12 +6,13 @@ const mongoose = require("mongoose");
 // const quizSchema = require("../schema/quizSchema");
 const QuizModel = require("../models/quizModel");
 const QuizTopicModel = require("../models/quizTopicModel");
+const removeExtraSpaces = require("../utilities/removeExtraSpaces");
 
 // router setup
 const router = express.Router();
 
 // get all the quiz
-router.get("/:topic", async (req, res) => {
+router.get("/:topicId", async (req, res) => {
   // try {
   //   const all_quizzes = await mongoose
   //     .model(`${req.params.topic}_quiz`, quizSchema)
@@ -33,9 +34,9 @@ router.get("/:topic", async (req, res) => {
   try {
     // const paramsValue = req.params.topic;
 
-    const regexParamsValue = new RegExp(`^${req.params.topic}$`, "i");
+    // const regexParamsValue = new RegExp(`^${req.params.topic}$`, "i");
     const quiz = await QuizModel.findOne({
-      relatedTopicName: regexParamsValue,
+      relatedTopicId: req.params.topicId,
     });
 
     if (quiz) {
@@ -53,32 +54,52 @@ router.get("/:topic", async (req, res) => {
 });
 
 // post a quiz
-router.post("/:topic", async (req, res) => {
+router.post("/:topicId", async (req, res) => {
   try {
     // checking if the topic exist or not
-    const regexParamsValue = new RegExp(`^${req.params.topic}$`, "i");
-    const isTopicExist = await QuizTopicModel.findOne({
-      title: regexParamsValue,
-    });
+    // const regexParamsValue = new RegExp(`^${req.params.topic}$`, "i");
+    const paramsValue = req.params.topicId;
+    const isTopicExist = await QuizTopicModel.findById(paramsValue);
 
     // checking if the quiz already exist or not
     const isQuizExist = await QuizModel.findOne({
-      relatedTopicName: regexParamsValue,
+      relatedTopicId: paramsValue,
     });
 
     // data to save
     // const data = {
-    //   relatedTopicName: isTopicExist?.title,
+    //   relatedTopicId: isTopicExist?.title,
 
     //   questionVault: req.body.questionVault,
     // };
 
     // data to save
-    const received_data = req.body.payload;
+    const received_data = {
+      question: removeExtraSpaces(req.body.payload.question),
+      isMultiple: req.body.payload.isMultiple,
+      options: [
+        {
+          value: removeExtraSpaces(req.body.payload.options[0].value),
+          isCorrect: req.body.payload.options[0].isCorrect,
+        },
+        {
+          value: removeExtraSpaces(req.body.payload.options[1].value),
+          isCorrect: req.body.payload.options[1].isCorrect,
+        },
+        {
+          value: removeExtraSpaces(req.body.payload.options[2].value),
+          isCorrect: req.body.payload.options[2].isCorrect,
+        },
+        {
+          value: removeExtraSpaces(req.body.payload.options[3].value),
+          isCorrect: req.body.payload.options[3].isCorrect,
+        },
+      ],
+    };
 
     if (isTopicExist && !isQuizExist && received_data) {
       const new_quiz_data = {
-        relatedTopicName: isTopicExist.title,
+        relatedTopicId: isTopicExist.id,
         questionVault: [received_data],
       };
 
@@ -90,11 +111,11 @@ router.post("/:topic", async (req, res) => {
       });
     } else if (
       isTopicExist?.title &&
-      isQuizExist?.relatedTopicName &&
+      isQuizExist?.relatedTopicId &&
       received_data
     ) {
       const updated_quiz = await QuizModel.findOneAndUpdate(
-        { relatedTopicName: regexParamsValue },
+        { relatedTopicId: paramsValue },
         { questionVault: [...isQuizExist.questionVault, received_data] },
         { returnDocument: "after" }
       );
@@ -115,21 +136,52 @@ router.post("/:topic", async (req, res) => {
 });
 
 // update a quiz
-router.put("/:topic", async (req, res) => {
+router.put("/:topicId", async (req, res) => {
   try {
     // checking if the topic exist or not
-    const regexParamsValue = new RegExp(`^${req.params.topic}$`, "i");
-    const isTopicExist = await QuizTopicModel.findOne({
-      title: regexParamsValue,
-    });
+    // const regexParamsValue = new RegExp(`^${req.params.topic}$`, "i");
+    const paramsValue = req.params.topicId;
+    const isTopicExist = await QuizTopicModel.findById(paramsValue);
 
     // checking if the quiz already exist or not
     const isQuizExist = await QuizModel.findOne({
-      relatedTopicName: regexParamsValue,
+      relatedTopicId: paramsValue,
     });
 
     // data to save
-    const received_data = req.body.payload;
+    const received_data = {
+      id: req.body.payload.id,
+      quizData: {
+        question: removeExtraSpaces(req.body.payload.quizData.question),
+        isMultiple: req.body.payload.quizData.isMultiple,
+        options: [
+          {
+            value: removeExtraSpaces(
+              req.body.payload.quizData.options[0].value
+            ),
+            isCorrect: req.body.payload.quizData.options[0].isCorrect,
+          },
+          {
+            value: removeExtraSpaces(
+              req.body.payload.quizData.options[1].value
+            ),
+            isCorrect: req.body.payload.quizData.options[1].isCorrect,
+          },
+          {
+            value: removeExtraSpaces(
+              req.body.payload.quizData.options[2].value
+            ),
+            isCorrect: req.body.payload.quizData.options[2].isCorrect,
+          },
+          {
+            value: removeExtraSpaces(
+              req.body.payload.quizData.options[3].value
+            ),
+            isCorrect: req.body.payload.quizData.options[3].isCorrect,
+          },
+        ],
+      },
+    };
 
     if (isTopicExist && isQuizExist && received_data) {
       const new_questionVault_value = isQuizExist.questionVault.map((qn) => {
@@ -147,7 +199,7 @@ router.put("/:topic", async (req, res) => {
       });
 
       const updated_quiz_optionAndValue = await QuizModel.findOneAndUpdate(
-        { relatedTopicName: regexParamsValue },
+        { relatedTopicId: paramsValue },
         { questionVault: new_questionVault_value },
         { returnDocument: "after" }
       );
@@ -164,12 +216,13 @@ router.put("/:topic", async (req, res) => {
 });
 
 // delete a quiz
-router.delete("/:topic", async (req, res) => {
+router.delete("/:topicId", async (req, res) => {
   try {
     // checking if the quiz already exist or not
-    const regexParamsValue = new RegExp(`^${req.params.topic}$`, "i");
+    // const regexParamsValue = new RegExp(`^${req.params.topic}$`, "i");
+    const paramsValue = req.params.topicId;
     const isQuizExist = await QuizModel.findOne({
-      relatedTopicName: regexParamsValue,
+      relatedTopicId: paramsValue,
     });
 
     // id to received
@@ -181,7 +234,7 @@ router.delete("/:topic", async (req, res) => {
       );
 
       const updated_quiz_after_deletion = await QuizModel.findOneAndUpdate(
-        { relatedTopicName: regexParamsValue },
+        { relatedTopicId: paramsValue },
         { questionVault: [...updatedValueAfterDeletion] },
         { returnDocument: "after" }
       );

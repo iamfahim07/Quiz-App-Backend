@@ -6,6 +6,9 @@ const topicDataValidator = require("../middlewares/topicDataValidator");
 const QuizTopicModel = require("../models/quizTopicModel");
 const firebaseFileUpload = require("../lib/firebaseFileUpload");
 const firebaseFileDelete = require("../lib/firebaseFileDelete");
+const QuizModel = require("../models/quizModel");
+const LeaderboardModel = require("../models/leaderboardModel");
+const removeExtraSpaces = require("../utilities/removeExtraSpaces");
 
 // router setup
 const router = express.Router();
@@ -18,6 +21,7 @@ router.get("/", async (req, res) => {
       description: 1,
       img_link: 1,
       img_ref: 1,
+      leaderboard: 1,
     });
 
     if (topics.length > 0) {
@@ -38,13 +42,13 @@ router.get("/", async (req, res) => {
 router.post("/", topicDataValidator, async (req, res) => {
   try {
     // extra space remover function
-    const removeExtraSpaces = (str) => {
-      return str
-        .trim()
-        .split(" ")
-        .filter((word) => word.length > 0)
-        .join(" ");
-    };
+    // const removeExtraSpaces = (str) => {
+    //   return str
+    //     .trim()
+    //     .split(/\s+/)
+    //     .filter((word) => word.length > 0)
+    //     .join(" ");
+    // };
 
     // checking if the topic already exist or not
     const regexParamsValue = new RegExp(
@@ -74,14 +78,34 @@ router.post("/", topicDataValidator, async (req, res) => {
     );
 
     const data = {
-      title: req.body.title,
-      description: req.body.description,
+      title: removeExtraSpaces(req.body.title),
+      description: removeExtraSpaces(req.body.description),
       img_link: img_link,
       img_ref: req.body.img_ref,
+      leaderboard: [],
     };
     const newQuizTopic = new QuizTopicModel(data);
     await newQuizTopic.save();
 
+    // creating a quiz database document for the newly added topic
+    const new_quiz_data = {
+      relatedTopicId: newQuizTopic.id,
+      questionVault: [],
+    };
+
+    const new_quiz = new QuizModel(new_quiz_data);
+    await new_quiz.save();
+
+    // creating a leaderboard database document for the newly added topic
+    const new_leaderboard_data = {
+      relatedTopicId: newQuizTopic.id,
+      topScorer: [],
+    };
+
+    const new_leaderboard = new LeaderboardModel(new_leaderboard_data);
+    await new_leaderboard.save();
+
+    // sending response
     res.status(200).json({
       data: newQuizTopic,
     });
@@ -101,13 +125,13 @@ router.post("/", topicDataValidator, async (req, res) => {
 router.put("/", topicDataValidator, async (req, res) => {
   try {
     // extra space remover function
-    const removeExtraSpaces = (str) => {
-      return str
-        .trim()
-        .split(" ")
-        .filter((word) => word.length > 0)
-        .join(" ");
-    };
+    // const removeExtraSpaces = (str) => {
+    //   return str
+    //     .trim()
+    //     .split(/\s+/)
+    //     .filter((word) => word.length > 0)
+    //     .join(" ");
+    // };
 
     // checking if the topic already exist or not
     const isTopicExist = await QuizTopicModel.findOne({
@@ -122,7 +146,7 @@ router.put("/", topicDataValidator, async (req, res) => {
 
     let data = {
       title: removeExtraSpaces(req.body.title),
-      description: req.body.description,
+      description: removeExtraSpaces(req.body.description),
     };
 
     if (req.body.img_object && req.body.img_ref) {
@@ -190,6 +214,12 @@ router.delete("/", async (req, res) => {
 
       // delete image from firebase
       await firebaseFileDelete(img_ref);
+
+      // delete related quiz document
+      await QuizModel.deleteOne({ relatedTopicId: data.id });
+
+      // delete related leaderboard document
+      await LeaderboardModel.deleteOne({ relatedTopicId: data.id });
 
       res.status(200).json({
         data: data.id,

@@ -18,12 +18,12 @@ const topScorerSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-  timeRequired: {
+  timeSpent: {
     type: Number,
     required: true,
     trim: true,
   },
-  createdAt: {
+  creationTime: {
     type: Number,
     required: true,
     trim: true,
@@ -33,7 +33,7 @@ const topScorerSchema = new mongoose.Schema({
 // leaderboard schema structure
 const leaderboardSchema = new mongoose.Schema(
   {
-    leaderboardName: {
+    relatedTopicId: {
       type: String,
       required: true,
       trim: true,

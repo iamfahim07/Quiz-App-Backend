@@ -42,7 +42,7 @@ const questionSchema = new mongoose.Schema({
 // quiz schema structure
 const quizSchema = new mongoose.Schema(
   {
-    relatedTopicName: {
+    relatedTopicId: {
       type: String,
       required: true,
       trim: true,

@@ -11,15 +11,15 @@ const QuizTopicModel = require("../models/quizTopicModel");
 const router = express.Router();
 
 // get all the top scorers
-router.get("/:leaderboard_name", async (req, res) => {
+router.get("/:leaderboard_id", async (req, res) => {
   try {
-    const paramsValue = req.params.leaderboard_name;
+    const paramsValue = req.params.leaderboard_id;
 
     const leaderboard = await LeaderboardModel.findOne({
-      leaderboardName: paramsValue,
+      relatedTopicId: paramsValue,
     });
 
-    if (leaderboard?.leaderboardName === paramsValue) {
+    if (leaderboard?.relatedTopicId === paramsValue) {
       res.status(200).json({ data: leaderboard });
     } else {
       res.status(409).json({
@@ -35,29 +35,18 @@ router.get("/:leaderboard_name", async (req, res) => {
 });
 
 // post new leaderboard
-router.post("/:leaderboard_name", async (req, res) => {
+router.post("/:leaderboard_id", async (req, res) => {
   try {
-    // const paramsValue = req.params.leaderboard_name;
+    // const paramsValue = req.params.leaderboard_id;
     // extra space remover function
-    const removeExtraSpaces = (str) => {
-      return str
-        .trim()
-        .split(" ")
-        .filter((word) => word.length > 0)
-        .join(" ");
-    };
 
     // checking if the topic exist or not
-    const regexParamsValue = new RegExp(
-      `^${req.params.leaderboard_name}$`,
-      "i"
-    );
-    const isTopicExist = await QuizTopicModel.findOne({
-      title: regexParamsValue,
-    });
+    // const regexParamsValue = new RegExp(`^${req.params.leaderboard_id}$`, "i");
+    const paramsValue = req.params.leaderboard_id;
+    const isTopicExist = await QuizTopicModel.findById(paramsValue);
 
     const leaderboard = await LeaderboardModel.findOne({
-      leaderboardName: isTopicExist.title,
+      relatedTopicId: paramsValue,
     });
 
     // let data = {
@@ -66,40 +55,39 @@ router.post("/:leaderboard_name", async (req, res) => {
     const playerQuizResult = req.body.payload;
 
     if (
-      (leaderboard === null ||
-        !leaderboard?.leaderboardName === regexParamsValue) &&
+      (leaderboard === null || !leaderboard?.relatedTopicId === paramsValue) &&
       playerQuizResult.userName
     ) {
       const data = {
-        leaderboardName: isTopicExist.title,
+        relatedTopicId: isTopicExist.id,
         topScorer: [playerQuizResult],
       };
 
-      // data.leaderboardName = regexParamsValue;
+      // data.relatedTopicId = regexParamsValue;
 
       const new_top_scorer = new LeaderboardModel(data);
       await new_top_scorer.save();
 
       res.status(200).json({ data: new_top_scorer });
     } else if (
-      leaderboard?.leaderboardName === isTopicExist.title &&
-      playerQuizResult.userName
+      leaderboard?.relatedTopicId === isTopicExist?.id &&
+      playerQuizResult?.userName
     ) {
       // analyse if the player made it into the top seven
       const topSeven = [...leaderboard.topScorer, playerQuizResult]
         .sort((a, b) => {
           if (a.obtainedScore !== b.obtainedScore) {
             return b.obtainedScore - a.obtainedScore;
-          } else if (a.timeRequired !== b.timeRequired) {
-            return a.timeRequired - b.timeRequired;
+          } else if (a.timeSpent !== b.timeSpent) {
+            return a.timeSpent - b.timeSpent;
           }
-          return a.createdAt - b.createdAt;
+          return a.creationTime - b.creationTime;
         })
         .slice(0, 7);
 
       const updated_data = await LeaderboardModel.findOneAndUpdate(
         {
-          leaderboardName: leaderboard.leaderboardName,
+          relatedTopicId: leaderboard.relatedTopicId,
         },
         { topScorer: topSeven },
         { returnDocument: "after" }
@@ -120,17 +108,17 @@ router.post("/:leaderboard_name", async (req, res) => {
 
 // update top scorers
 // unused
-router.put("/:leaderboard_name", async (req, res) => {
+router.put("/:leaderboard_id", async (req, res) => {
   // try {
-  //   const paramsValue = req.params.leaderboard_name;
+  //   const paramsValue = req.params.leaderboard_id;
   //   const leaderboard = await LeaderboardModel.findOne({
-  //     leaderboardName: paramsValue,
+  //     relatedTopicId: paramsValue,
   //   });
   //   const data = [...req.body.topScorer];
-  //   if (leaderboard?.leaderboardName === paramsValue && data?.length) {
+  //   if (leaderboard?.relatedTopicId === paramsValue && data?.length) {
   //     const updated_data = await LeaderboardModel.findOneAndUpdate(
   //       {
-  //         leaderboardName: paramsValue,
+  //         relatedTopicId: paramsValue,
   //       },
   //       { topScorer: data },
   //       { returnDocument: "after" }
