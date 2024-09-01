@@ -14,12 +14,18 @@ const quizTopicHandler = require("./routeHandler/quizTopicHandler");
 const quizHandler = require("./routeHandler/quizHandler");
 const userHandler = require("./routeHandler/userHandler");
 const leaderboardHandler = require("./routeHandler/leaderboardHandler");
+const checkLogin = require("./middlewares/checkLogin");
 
 // express app initialization
 const app = express();
 
 // cross-origin resource sharing middleware
-app.use(cors());
+app.use(
+  cors({
+    origin: `${process.env.ORIGIN_URL}`,
+    credentials: true,
+  })
+);
 
 // json parser middleware
 app.use(express.json());
@@ -41,9 +47,9 @@ app.get("/error", (req, res, next) => {
   throw new Error("Something went wrong!");
 });
 
-app.use("/topics", quizTopicHandler);
+app.use("/topics", checkLogin, quizTopicHandler);
 
-app.use("/quizzes", quizHandler);
+app.use("/quizzes", checkLogin, quizHandler);
 
 app.use("/user", userHandler);
 

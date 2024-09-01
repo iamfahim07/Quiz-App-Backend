@@ -6,14 +6,20 @@ const jwt = require("jsonwebtoken");
 const userModel = require("../models/userModel");
 const getNewTokens = require("../utilities/getNewTokens");
 
+const checkAuth = async (accessToken) => {
+  const decoded = jwt.verify(accessToken, process.env.SECRET_KEY);
+
+  const user = {
+    fullName: decoded.fullName,
+    userName: decoded.userName,
+    role: decoded.role,
+  };
+
+  return user;
+};
+
 const login = async (userName, password) => {
-  const [user] =
-    (await userModel.find({ userName }).select({
-      fullName: 1,
-      userName: 1,
-      password: 1,
-      role: 1,
-    })) || [];
+  const user = (await userModel.findOne({ userName })) || {};
 
   if (!user?.userName) {
     throw new Error("User not found or Invalid password");
@@ -25,13 +31,16 @@ const login = async (userName, password) => {
     throw new Error("User not found or Invalid password");
   }
 
-  const tokens = getNewTokens(user._doc);
+  const userData = {
+    fullName: user.fullName,
+    userName: user.userName,
+    role: user.role,
+  };
 
-  let userObj = Object.assign({}, user._doc);
-  delete userObj.password;
+  const tokens = getNewTokens(userData);
 
   return {
-    user: userObj,
+    user: userData,
     tokens,
   };
 };
@@ -39,7 +48,7 @@ const login = async (userName, password) => {
 const register = async (reqBody) => {
   const { fullName, userName, password } = reqBody;
 
-  const [user] = await userModel.find({ userName });
+  const user = (await userModel.findOne({ userName })) || {};
 
   if (user?.userName) {
     throw new Error("User name already exists");
@@ -47,21 +56,25 @@ const register = async (reqBody) => {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  const newUserInfo = {
+  const newUserInfoData = {
     fullName,
     userName,
     password: hashedPassword,
   };
 
-  const newUser = new userModel(newUserInfo);
-  await newUser.save();
+  const newUserInfo = new userModel(newUserInfoData);
+  const newUser = await newUserInfo.save();
 
-  const tokens = getNewTokens(newUserInfo);
+  const newUserData = {
+    fullName: newUser.fullName,
+    userName: newUser.userName,
+    role: newUser.role,
+  };
 
-  delete newUserInfo.password;
+  const tokens = getNewTokens(newUserData);
 
   return {
-    user: newUserInfo,
+    user: newUserData,
     tokens,
   };
 };
@@ -70,23 +83,19 @@ const refreshToken = async (refreshToken) => {
   // check if refresh token valid
   const decoded = jwt.verify(refreshToken, process.env.REFRESH_SECRET_KEY);
 
-  if (!decoded) {
-    throw new Error("Invalid refresh token");
-  }
+  const user = {
+    fullName: decoded.fullName,
+    userName: decoded.userName,
+    role: decoded.role,
+  };
 
-  // check if user exists
-  const [user] = await userModel.find({ userName: decoded.userName });
+  const tokens = getNewTokens(user);
 
-  if (!user?.userName) {
-    throw new Error("User not found");
-  }
-
-  const tokens = getNewTokens(user._doc);
-
-  return tokens;
+  return { user, tokens };
 };
 
 module.exports.UserService = {
+  checkAuth,
   login,
   register,
   refreshToken,

@@ -8,8 +8,13 @@ const jwt = require("jsonwebtoken");
  * @returns {Object} - An object containing the generated token and refresh token.
  */
 const getNewTokens = (user) => {
-  const token = jwt.sign(
-    { userName: user.userName, type: "access" },
+  const accessToken = jwt.sign(
+    {
+      fullName: user.fullName,
+      userName: user.userName,
+      role: user.role,
+      type: "access",
+    },
     process.env.SECRET_KEY,
     {
       expiresIn: process.env.JWT_EXPIRES_IN,
@@ -17,14 +22,19 @@ const getNewTokens = (user) => {
   );
 
   const refreshToken = jwt.sign(
-    { userName: user.userName, type: "refresh" },
+    {
+      fullName: user.fullName,
+      userName: user.userName,
+      role: user.role,
+      type: "refresh",
+    },
     process.env.REFRESH_SECRET_KEY,
     {
       expiresIn: process.env.REFRESH_JWT_EXPIRES_IN,
     }
   );
 
-  return { token, refreshToken };
+  return { accessToken, refreshToken };
 };
 
 module.exports = getNewTokens;
