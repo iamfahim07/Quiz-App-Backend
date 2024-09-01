@@ -3,7 +3,6 @@ const express = require("express");
 const mongoose = require("mongoose");
 
 // internal import
-// const quizSchema = require("../schema/quizSchema");
 const QuizModel = require("../models/quizModel");
 const QuizTopicModel = require("../models/quizTopicModel");
 const removeExtraSpaces = require("../utilities/removeExtraSpaces");
@@ -13,28 +12,7 @@ const router = express.Router();
 
 // get all the quiz
 router.get("/:topicId", async (req, res) => {
-  // try {
-  //   const all_quizzes = await mongoose
-  //     .model(`${req.params.topic}_quiz`, quizSchema)
-  //     .find();
-
-  //   if (all_quizzes.length > 0) {
-  //     res.status(200).json({ data: all_quizzes });
-  //   } else {
-  //     res.status(409).json({
-  //       message: "No quiz found",
-  //     });
-  //   }
-  // } catch (err) {
-  //   res.status(500).json({
-  //     message: "there was an error",
-  //   });
-  // }
-
   try {
-    // const paramsValue = req.params.topic;
-
-    // const regexParamsValue = new RegExp(`^${req.params.topic}$`, "i");
     const quiz = await QuizModel.findOne({
       relatedTopicId: req.params.topicId,
     });
@@ -57,7 +35,6 @@ router.get("/:topicId", async (req, res) => {
 router.post("/:topicId", async (req, res) => {
   try {
     // checking if the topic exist or not
-    // const regexParamsValue = new RegExp(`^${req.params.topic}$`, "i");
     const paramsValue = req.params.topicId;
     const isTopicExist = await QuizTopicModel.findById(paramsValue);
 
@@ -65,13 +42,6 @@ router.post("/:topicId", async (req, res) => {
     const isQuizExist = await QuizModel.findOne({
       relatedTopicId: paramsValue,
     });
-
-    // data to save
-    // const data = {
-    //   relatedTopicId: isTopicExist?.title,
-
-    //   questionVault: req.body.questionVault,
-    // };
 
     // data to save
     const received_data = {
@@ -139,7 +109,6 @@ router.post("/:topicId", async (req, res) => {
 router.put("/:topicId", async (req, res) => {
   try {
     // checking if the topic exist or not
-    // const regexParamsValue = new RegExp(`^${req.params.topic}$`, "i");
     const paramsValue = req.params.topicId;
     const isTopicExist = await QuizTopicModel.findById(paramsValue);
 
@@ -219,7 +188,6 @@ router.put("/:topicId", async (req, res) => {
 router.delete("/:topicId", async (req, res) => {
   try {
     // checking if the quiz already exist or not
-    // const regexParamsValue = new RegExp(`^${req.params.topic}$`, "i");
     const paramsValue = req.params.topicId;
     const isQuizExist = await QuizModel.findOne({
       relatedTopicId: paramsValue,

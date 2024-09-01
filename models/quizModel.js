@@ -47,11 +47,6 @@ const quizSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    // relatedTopicID: {
-    //   type: Number,
-    //   required: true,
-    //   trim: true,
-    // },
 
     questionVault: {
       type: [questionSchema],

@@ -21,7 +21,6 @@ router.get("/", async (req, res) => {
       description: 1,
       img_link: 1,
       img_ref: 1,
-      leaderboard: 1,
     });
 
     if (topics.length > 0) {
@@ -41,15 +40,6 @@ router.get("/", async (req, res) => {
 // post a quiz topic
 router.post("/", topicDataValidator, async (req, res) => {
   try {
-    // extra space remover function
-    // const removeExtraSpaces = (str) => {
-    //   return str
-    //     .trim()
-    //     .split(/\s+/)
-    //     .filter((word) => word.length > 0)
-    //     .join(" ");
-    // };
-
     // checking if the topic already exist or not
     const regexParamsValue = new RegExp(
       `^${removeExtraSpaces(req.body.title)}$`,
@@ -82,7 +72,6 @@ router.post("/", topicDataValidator, async (req, res) => {
       description: removeExtraSpaces(req.body.description),
       img_link: img_link,
       img_ref: req.body.img_ref,
-      leaderboard: [],
     };
     const newQuizTopic = new QuizTopicModel(data);
     await newQuizTopic.save();
@@ -124,15 +113,6 @@ router.post("/", topicDataValidator, async (req, res) => {
 // update a quiz topic
 router.put("/", topicDataValidator, async (req, res) => {
   try {
-    // extra space remover function
-    // const removeExtraSpaces = (str) => {
-    //   return str
-    //     .trim()
-    //     .split(/\s+/)
-    //     .filter((word) => word.length > 0)
-    //     .join(" ");
-    // };
-
     // checking if the topic already exist or not
     const isTopicExist = await QuizTopicModel.findOne({
       _id: req.body.id,
@@ -172,12 +152,6 @@ router.put("/", topicDataValidator, async (req, res) => {
       };
     }
 
-    // const data = {
-    //   title: removeExtraSpaces(req.body.title),
-    //   description: req.body.description,
-    //   img_link: isTopicExist.img_link,
-    //   img_ref: isTopicExist.img_ref,
-    // };
     const topic = await QuizTopicModel.findByIdAndUpdate(
       req.body.id,
       {

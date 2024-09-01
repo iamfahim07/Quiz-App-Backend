@@ -5,7 +5,6 @@ const mongoose = require("mongoose");
 // internal import
 const LeaderboardModel = require("../models/leaderboardModel");
 const QuizTopicModel = require("../models/quizTopicModel");
-// const lockMiddleware = require("../middlewares/lockMiddleware");
 
 // router setup
 const router = express.Router();
@@ -37,11 +36,7 @@ router.get("/:leaderboard_id", async (req, res) => {
 // post new leaderboard
 router.post("/:leaderboard_id", async (req, res) => {
   try {
-    // const paramsValue = req.params.leaderboard_id;
-    // extra space remover function
-
     // checking if the topic exist or not
-    // const regexParamsValue = new RegExp(`^${req.params.leaderboard_id}$`, "i");
     const paramsValue = req.params.leaderboard_id;
     const isTopicExist = await QuizTopicModel.findById(paramsValue);
 
@@ -49,9 +44,6 @@ router.post("/:leaderboard_id", async (req, res) => {
       relatedTopicId: paramsValue,
     });
 
-    // let data = {
-
-    // };
     const playerQuizResult = req.body.payload;
 
     if (
@@ -62,8 +54,6 @@ router.post("/:leaderboard_id", async (req, res) => {
         relatedTopicId: isTopicExist.id,
         topScorer: [playerQuizResult],
       };
-
-      // data.relatedTopicId = regexParamsValue;
 
       const new_top_scorer = new LeaderboardModel(data);
       await new_top_scorer.save();
@@ -104,61 +94,6 @@ router.post("/:leaderboard_id", async (req, res) => {
       message: "there was an error",
     });
   }
-});
-
-// update top scorers
-// unused
-router.put("/:leaderboard_id", async (req, res) => {
-  // try {
-  //   const paramsValue = req.params.leaderboard_id;
-  //   const leaderboard = await LeaderboardModel.findOne({
-  //     relatedTopicId: paramsValue,
-  //   });
-  //   const data = [...req.body.topScorer];
-  //   if (leaderboard?.relatedTopicId === paramsValue && data?.length) {
-  //     const updated_data = await LeaderboardModel.findOneAndUpdate(
-  //       {
-  //         relatedTopicId: paramsValue,
-  //       },
-  //       { topScorer: data },
-  //       { returnDocument: "after" }
-  //     );
-  //     res.status(200).json({
-  //       data: updated_data,
-  //     });
-  //   } else {
-  //     res.status(409).json({
-  //       message: "No Leaderboard exist by this name",
-  //     });
-  //   }
-  // } catch (err) {
-  //   res.status(500).json({
-  //     message: "there was an error",
-  //   });
-  // }
-});
-
-// delete leaderboard data
-// unused
-router.delete("/:topic/:id", async (req, res) => {
-  // try {
-  //   const data = {
-  //     title: req.body.title,
-  //     img_link: req.img_link,
-  //     img_ref: req.img_ref,
-  //   };
-  // delete the document from MongoDB
-  //   const deletedQuiz = await mongoose
-  //     .model(`${req.params.topic}_quiz`, quizSchema)
-  //     .findByIdAndDelete(req.params.id);
-  //   res.status(200).json({
-  //     data: deletedQuiz,
-  //   });
-  // } catch (err) {
-  //   res.status(500).json({
-  //     message: "there was an error",
-  //   });
-  // }
 });
 
 module.exports = router;
