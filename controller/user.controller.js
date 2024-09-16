@@ -39,7 +39,7 @@ const login = async (req, res) => {
 
     res.status(200).json({ data: user });
   } catch (err) {
-    res.status(500).json({ message: "Authentication error" });
+    res.status(500).json({ message: "Authentication error!" });
   }
 };
 
@@ -60,7 +60,7 @@ const register = async (req, res) => {
   try {
     if (!req?.body?.fullName || !req?.body?.userName || !req?.body?.password) {
       return res.status(400).json({
-        message: "Please provide full name, user name and password,",
+        message: "Please provide full name, user name and password!",
       });
     }
 
@@ -72,9 +72,12 @@ const register = async (req, res) => {
     res.cookie("accessToken", accessToken, { httpOnly: true });
     res.cookie("refreshToken", refreshToken, { httpOnly: true });
 
-    res.status(201).json(user);
+    res.status(201).json({ data: user });
   } catch (err) {
-    res.status(500).json({ message: "Registration failed" });
+    res.status(500).json({
+      message:
+        "Sorry, that username is already taken. Please try a different one.",
+    });
   }
 };
 
@@ -98,7 +101,7 @@ const refreshToken = async (req, res) => {
   } catch (err) {
     res.clearCookie("accessToken");
     res.clearCookie("refreshToken");
-    res.status(401).json({ message: "Authentication error" });
+    res.status(401).json({ message: "Authentication error!" });
   }
 };
 

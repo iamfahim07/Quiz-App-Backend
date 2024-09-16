@@ -43,26 +43,35 @@ router.post("/:topicId", async (req, res) => {
       relatedTopicId: paramsValue,
     });
 
+    // checking if the quiz is true/false or sortable
+    let isMultiple = req.body.payload.isMultiple;
+    let isSortQuiz = req.body.payload.isSortQuiz;
+
     // data to save
     const received_data = {
       question: removeExtraSpaces(req.body.payload.question),
-      isMultiple: req.body.payload.isMultiple,
+      isMultiple: isSortQuiz ? false : isMultiple,
+      isSortQuiz: isSortQuiz,
       options: [
         {
           value: removeExtraSpaces(req.body.payload.options[0].value),
-          isCorrect: req.body.payload.options[0].isCorrect,
+          isCorrect: isSortQuiz ? false : req.body.payload.options[0].isCorrect,
+          position: isSortQuiz ? req.body.payload.options[0].position : null,
         },
         {
           value: removeExtraSpaces(req.body.payload.options[1].value),
-          isCorrect: req.body.payload.options[1].isCorrect,
+          isCorrect: isSortQuiz ? false : req.body.payload.options[1].isCorrect,
+          position: isSortQuiz ? req.body.payload.options[1].position : null,
         },
         {
           value: removeExtraSpaces(req.body.payload.options[2].value),
-          isCorrect: req.body.payload.options[2].isCorrect,
+          isCorrect: isSortQuiz ? false : req.body.payload.options[2].isCorrect,
+          position: isSortQuiz ? req.body.payload.options[2].position : null,
         },
         {
           value: removeExtraSpaces(req.body.payload.options[3].value),
-          isCorrect: req.body.payload.options[3].isCorrect,
+          isCorrect: isSortQuiz ? false : req.body.payload.options[3].isCorrect,
+          position: isSortQuiz ? req.body.payload.options[3].position : null,
         },
       ],
     };
@@ -117,36 +126,60 @@ router.put("/:topicId", async (req, res) => {
       relatedTopicId: paramsValue,
     });
 
+    // checking if the quiz is true/false or sortable
+    const isSortQuiz = req.body.payload.quizData.isSortQuiz;
+
     // data to save
     const received_data = {
       id: req.body.payload.id,
       quizData: {
         question: removeExtraSpaces(req.body.payload.quizData.question),
-        isMultiple: req.body.payload.quizData.isMultiple,
+        isMultiple: isSortQuiz ? false : req.body.payload.quizData.isMultiple,
+        isSortQuiz: isSortQuiz,
         options: [
           {
             value: removeExtraSpaces(
               req.body.payload.quizData.options[0].value
             ),
-            isCorrect: req.body.payload.quizData.options[0].isCorrect,
+            isCorrect: isSortQuiz
+              ? false
+              : req.body.payload.quizData.options[0].isCorrect,
+            position: isSortQuiz
+              ? req.body.payload.quizData.options[0].position
+              : null,
           },
           {
             value: removeExtraSpaces(
               req.body.payload.quizData.options[1].value
             ),
-            isCorrect: req.body.payload.quizData.options[1].isCorrect,
+            isCorrect: isSortQuiz
+              ? false
+              : req.body.payload.quizData.options[1].isCorrect,
+            position: isSortQuiz
+              ? req.body.payload.quizData.options[1].position
+              : null,
           },
           {
             value: removeExtraSpaces(
               req.body.payload.quizData.options[2].value
             ),
-            isCorrect: req.body.payload.quizData.options[2].isCorrect,
+            isCorrect: isSortQuiz
+              ? false
+              : req.body.payload.quizData.options[2].isCorrect,
+            position: isSortQuiz
+              ? req.body.payload.quizData.options[2].position
+              : null,
           },
           {
             value: removeExtraSpaces(
               req.body.payload.quizData.options[3].value
             ),
-            isCorrect: req.body.payload.quizData.options[3].isCorrect,
+            isCorrect: isSortQuiz
+              ? false
+              : req.body.payload.quizData.options[3].isCorrect,
+            position: isSortQuiz
+              ? req.body.payload.quizData.options[3].position
+              : null,
           },
         ],
       },
@@ -158,6 +191,7 @@ router.put("/:topicId", async (req, res) => {
           let updated_data = {
             question: received_data.quizData.question,
             isMultiple: received_data.quizData.isMultiple,
+            isSortQuiz: received_data.quizData.isSortQuiz,
             options: [...received_data.quizData.options],
           };
 

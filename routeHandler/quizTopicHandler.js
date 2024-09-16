@@ -27,7 +27,7 @@ router.get("/", async (req, res) => {
       res.status(200).json({ data: topics });
     } else {
       res.status(409).json({
-        message: "No topic found",
+        message: "No quiz topic found...",
       });
     }
   } catch (err) {
@@ -51,7 +51,8 @@ router.post("/", topicDataValidator, async (req, res) => {
 
     if (isTopicExist) {
       return res.status(409).json({
-        message: "This quiz topic is already exist. Try another topic",
+        message:
+          "This quiz topic name is already exist! Try another topic name.",
       });
     }
 
@@ -124,11 +125,33 @@ router.put("/", topicDataValidator, async (req, res) => {
       });
     }
 
+    // extracting all relevant data from the request
     let data = {
       title: removeExtraSpaces(req.body.title),
       description: removeExtraSpaces(req.body.description),
     };
 
+    const regexParamsValue = new RegExp(
+      `^${removeExtraSpaces(data.title)}$`,
+      "i"
+    );
+
+    // checking if the topic name already taken or not
+    const isTopicNameTaken = await QuizTopicModel.findOne({
+      title: regexParamsValue,
+    });
+
+    if (
+      isTopicExist.title.toLowerCase() !== data.title.toLowerCase() &&
+      isTopicNameTaken
+    ) {
+      return res.status(409).json({
+        message:
+          "This quiz topic name is already exist! Try another topic name.",
+      });
+    }
+
+    // delete the existing image file if the user wants to update the image with a new image
     if (req.body.img_object && req.body.img_ref) {
       // delete the existing image file
       await firebaseFileDelete(isTopicExist.img_ref);

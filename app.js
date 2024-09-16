@@ -38,7 +38,7 @@ dotenv.config();
 
 // database connection with mongoose
 mongoose
-  .connect("mongodb://localhost/quizAppDB")
+  .connect(process.env.MONGO_URI)
   .then(() => console.log("database connection successfull"))
   .catch((err) => console.log(err));
 
