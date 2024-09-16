@@ -29,51 +29,60 @@ function topicDataValidator(req, res, next) {
         ? true
         : false;
 
-    if (title && description) {
-      if (err) {
-        res.status(500).json({
-          message: "there was an upload error",
-        });
-      } else {
-        // checking if file exist or not
-        if (req.file) {
-          // modifying the image name
-          const ext = path.extname(req.file.originalname);
-          const modifiedName =
-            req.file.originalname
-              .replace(ext, "")
-              .toLowerCase()
-              .split(" ")
-              .join("-") +
-            "-" +
-            Date.now() +
-            ext;
-
-          // reciving the image buffer
-          const img_buffer = req.file.buffer;
-
-          // create the image from buffer
-          const img_object = new File([img_buffer], req.file.originalname, {
-            type: req.file.mimetype,
-          });
-
-          // sending the necessary data to the next middleware
-          req.body.img_object = img_object;
-          req.body.img_ref = modifiedName;
-
-          next();
+    try {
+      if (title && description) {
+        if (err) {
+          throw new Error(err);
         } else {
-          // sending the necessary data to the next middleware
-          req.body.img_object = null;
-          req.body.img_ref = null;
+          // checking if file exist or not
+          if (req.file) {
+            // modifying the image name
+            const ext = path.extname(req.file.originalname);
+            const modifiedName =
+              req.file.originalname
+                .replace(ext, "")
+                .toLowerCase()
+                .split(" ")
+                .join("-") +
+              "-" +
+              Date.now() +
+              ext;
 
-          next();
+            // reciving the image buffer
+            const img_buffer = req.file.buffer;
+
+            // create the image from buffer
+            const img_object = new File([img_buffer], req.file.originalname, {
+              type: req.file.mimetype,
+            });
+
+            // sending the necessary data to the next middleware
+            req.body.img_object = img_object;
+            req.body.img_ref = modifiedName;
+
+            next();
+          } else {
+            // sending the necessary data to the next middleware
+            req.body.img_object = null;
+            req.body.img_ref = null;
+
+            next();
+          }
         }
+      } else {
+        res.status(409).json({
+          message:
+            "String field error, either empty field or characters limit exceed",
+        });
       }
-    } else {
-      res.status(409).json({
-        message:
-          "String field error, either empty field or characters limit exceed",
+    } catch (err) {
+      const errorMessage =
+        err.message === "MulterError: File too large"
+          ? "The file size of the image you uploaded is too large. Please select a file within the size limit."
+          : err.message;
+
+      res.status(500).json({
+        message: errorMessage,
       });
     }
   });

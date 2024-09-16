@@ -14,6 +14,12 @@ const optionSchema = new mongoose.Schema({
     required: true,
     enum: [true, false],
   },
+  position: {
+    type: Number,
+    required: false,
+    min: 1,
+    max: 4,
+  },
 });
 
 // question schema structure
@@ -25,6 +31,11 @@ const questionSchema = new mongoose.Schema({
     maxlength: [100, "Question cannot exceed 100 characters"],
   },
   isMultiple: {
+    type: Boolean,
+    required: true,
+    enum: [true, false],
+  },
+  isSortQuiz: {
     type: Boolean,
     required: true,
     enum: [true, false],
