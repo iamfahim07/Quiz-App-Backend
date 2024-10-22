@@ -37,14 +37,12 @@ const login = async (req, res) => {
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "None",
-      domain: process.env.BACKEND_ORIGIN_URL,
+      sameSite: false,
     });
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "None",
-      domain: process.env.BACKEND_ORIGIN_URL,
+      sameSite: false,
     });
 
     res.status(200).json({ data: user });
@@ -82,14 +80,12 @@ const register = async (req, res) => {
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "None",
-      domain: process.env.BACKEND_ORIGIN_URL,
+      sameSite: false,
     });
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "None",
-      domain: process.env.BACKEND_ORIGIN_URL,
+      sameSite: false,
     });
 
     res.status(201).json({ data: user });
@@ -117,14 +113,12 @@ const refreshToken = async (req, res) => {
     res.cookie("accessToken", newAccessToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "None",
-      domain: process.env.BACKEND_ORIGIN_URL,
+      sameSite: false,
     });
     res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true,
       secure: true,
-      sameSite: "None",
-      domain: process.env.BACKEND_ORIGIN_URL,
+      sameSite: false,
     });
 
     res.status(200).json({ data: user });
