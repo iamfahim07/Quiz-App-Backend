@@ -46,14 +46,12 @@ const checkLogin = (req, res, next) => {
       res.cookie("accessToken", newAccessToken, {
         httpOnly: true,
         secure: true,
-        sameSite: "None",
-        domain: process.env.BACKEND_ORIGIN_URL,
+        sameSite: false,
       });
       res.cookie("refreshToken", newRefreshToken, {
         httpOnly: true,
         secure: true,
-        sameSite: "None",
-        domain: process.env.BACKEND_ORIGIN_URL,
+        sameSite: false,
       });
 
       const requestMethod = req.method;
