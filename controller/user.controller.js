@@ -34,8 +34,18 @@ const login = async (req, res) => {
       tokens: { accessToken, refreshToken },
     } = await UserService.login(userName, password);
 
-    res.cookie("accessToken", accessToken, { httpOnly: true });
-    res.cookie("refreshToken", refreshToken, { httpOnly: true });
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      domain: process.env.BACKEND_ORIGIN_URL,
+    });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      domain: process.env.BACKEND_ORIGIN_URL,
+    });
 
     res.status(200).json({ data: user });
   } catch (err) {
@@ -69,8 +79,18 @@ const register = async (req, res) => {
       tokens: { accessToken, refreshToken },
     } = await UserService.register(req.body);
 
-    res.cookie("accessToken", accessToken, { httpOnly: true });
-    res.cookie("refreshToken", refreshToken, { httpOnly: true });
+    res.cookie("accessToken", accessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      domain: process.env.BACKEND_ORIGIN_URL,
+    });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      domain: process.env.BACKEND_ORIGIN_URL,
+    });
 
     res.status(201).json({ data: user });
   } catch (err) {
@@ -94,8 +114,18 @@ const refreshToken = async (req, res) => {
       tokens: { accessToken: newAccessToken, refreshToken: newRefreshToken },
     } = await UserService.refreshToken(refreshToken);
 
-    res.cookie("accessToken", newAccessToken, { httpOnly: true });
-    res.cookie("refreshToken", newRefreshToken, { httpOnly: true });
+    res.cookie("accessToken", newAccessToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      domain: process.env.BACKEND_ORIGIN_URL,
+    });
+    res.cookie("refreshToken", newRefreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+      domain: process.env.BACKEND_ORIGIN_URL,
+    });
 
     res.status(200).json({ data: user });
   } catch (err) {
