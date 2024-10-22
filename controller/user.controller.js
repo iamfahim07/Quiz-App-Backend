@@ -38,11 +38,13 @@ const login = async (req, res) => {
       httpOnly: true,
       secure: true,
       sameSite: false,
+      maxAge: 24 * 60 * 60 * 1000,
     });
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: false,
+      maxAge: 24 * 60 * 60 * 1000,
     });
 
     res.status(200).json({ data: user });
@@ -81,11 +83,13 @@ const register = async (req, res) => {
       httpOnly: true,
       secure: true,
       sameSite: false,
+      maxAge: 24 * 60 * 60 * 1000,
     });
     res.cookie("refreshToken", refreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: false,
+      maxAge: 24 * 60 * 60 * 1000,
     });
 
     res.status(201).json({ data: user });
@@ -114,11 +118,13 @@ const refreshToken = async (req, res) => {
       httpOnly: true,
       secure: true,
       sameSite: false,
+      maxAge: 24 * 60 * 60 * 1000,
     });
     res.cookie("refreshToken", newRefreshToken, {
       httpOnly: true,
       secure: true,
       sameSite: false,
+      maxAge: 24 * 60 * 60 * 1000,
     });
 
     res.status(200).json({ data: user });
