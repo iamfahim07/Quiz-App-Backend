@@ -47,11 +47,13 @@ const checkLogin = (req, res, next) => {
         httpOnly: true,
         secure: true,
         sameSite: false,
+        maxAge: 24 * 60 * 60 * 1000,
       });
       res.cookie("refreshToken", newRefreshToken, {
         httpOnly: true,
         secure: true,
         sameSite: false,
+        maxAge: 24 * 60 * 60 * 1000,
       });
 
       const requestMethod = req.method;
