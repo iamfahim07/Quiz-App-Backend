@@ -72,8 +72,16 @@ const checkLogin = (req, res, next) => {
 
       next();
     } catch {
-      res.clearCookie("accessToken");
-      res.clearCookie("refreshToken");
+      res.clearCookie("accessToken", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "None",
+      });
+      res.clearCookie("refreshToken", {
+        httpOnly: true,
+        secure: true,
+        sameSite: "None",
+      });
       res.status(401).json({ message: "Authentication error" });
     }
   }

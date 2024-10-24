@@ -56,8 +56,16 @@ const login = async (req, res) => {
 // logout router callback function
 const logout = async (req, res) => {
   try {
-    res.clearCookie("accessToken");
-    res.clearCookie("refreshToken");
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+    });
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+    });
 
     res.status(200).json({ message: "Logged out successfully" });
   } catch (err) {
@@ -129,8 +137,16 @@ const refreshToken = async (req, res) => {
 
     res.status(200).json({ data: user });
   } catch (err) {
-    res.clearCookie("accessToken");
-    res.clearCookie("refreshToken");
+    res.clearCookie("accessToken", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+    });
+    res.clearCookie("refreshToken", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "None",
+    });
     res.status(401).json({ message: "Authentication error!" });
   }
 };
