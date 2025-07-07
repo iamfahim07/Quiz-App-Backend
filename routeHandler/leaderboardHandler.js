@@ -48,7 +48,7 @@ router.post("/:leaderboard_id", async (req, res) => {
 
     if (
       (leaderboard === null || !leaderboard?.relatedTopicId === paramsValue) &&
-      playerQuizResult.userName
+      playerQuizResult.username
     ) {
       const data = {
         relatedTopicId: isTopicExist.id,
@@ -61,7 +61,7 @@ router.post("/:leaderboard_id", async (req, res) => {
       res.status(200).json({ data: new_top_scorer });
     } else if (
       leaderboard?.relatedTopicId === isTopicExist?.id &&
-      playerQuizResult?.userName
+      playerQuizResult?.username
     ) {
       // analyse if the player made it into the top seven
       const topSeven = [...leaderboard.topScorer, playerQuizResult]

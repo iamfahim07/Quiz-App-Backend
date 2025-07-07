@@ -21,18 +21,18 @@ const checkAuth = async (req, res) => {
 // login router callback function
 const login = async (req, res) => {
   try {
-    if (!req?.body?.userName || !req?.body?.password) {
+    if (!req?.body?.username || !req?.body?.password) {
       return res
         .status(400)
         .json({ message: "Please provide user name and password" });
     }
 
-    const { userName, password } = req.body;
+    const { username, password } = req.body;
 
     const {
       user,
       tokens: { accessToken, refreshToken },
-    } = await UserService.login(userName, password);
+    } = await UserService.login(username, password);
 
     res.cookie("accessToken", accessToken, {
       httpOnly: true,
@@ -76,7 +76,7 @@ const logout = async (req, res) => {
 // register router callback function
 const register = async (req, res) => {
   try {
-    if (!req?.body?.fullName || !req?.body?.userName || !req?.body?.password) {
+    if (!req?.body?.fullName || !req?.body?.username || !req?.body?.password) {
       return res.status(400).json({
         message: "Please provide full name, user name and password!",
       });
