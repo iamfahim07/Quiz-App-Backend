@@ -8,7 +8,7 @@ const topScorerSchema = new mongoose.Schema({
     required: true,
     trim: true,
   },
-  userName: {
+  username: {
     type: String,
     required: true,
     trim: true,

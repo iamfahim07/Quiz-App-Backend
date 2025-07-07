@@ -11,17 +11,17 @@ const checkAuth = async (accessToken) => {
 
   const user = {
     fullName: decoded.fullName,
-    userName: decoded.userName,
+    username: decoded.username,
     role: decoded.role,
   };
 
   return user;
 };
 
-const login = async (userName, password) => {
-  const user = (await userModel.findOne({ userName })) || {};
+const login = async (username, password) => {
+  const user = (await userModel.findOne({ username })) || {};
 
-  if (!user?.userName) {
+  if (!user?.username) {
     throw new Error("User not found or Invalid password");
   }
 
@@ -33,7 +33,7 @@ const login = async (userName, password) => {
 
   const userData = {
     fullName: user.fullName,
-    userName: user.userName,
+    username: user.username,
     role: user.role,
   };
 
@@ -46,11 +46,11 @@ const login = async (userName, password) => {
 };
 
 const register = async (reqBody) => {
-  const { fullName, userName, password } = reqBody;
+  const { fullName, username, password } = reqBody;
 
-  const user = (await userModel.findOne({ userName })) || {};
+  const user = (await userModel.findOne({ username })) || {};
 
-  if (user?.userName) {
+  if (user?.username) {
     throw new Error("User name already exists");
   }
 
@@ -58,7 +58,7 @@ const register = async (reqBody) => {
 
   const newUserInfoData = {
     fullName,
-    userName,
+    username,
     password: hashedPassword,
   };
 
@@ -67,7 +67,7 @@ const register = async (reqBody) => {
 
   const newUserData = {
     fullName: newUser.fullName,
-    userName: newUser.userName,
+    username: newUser.username,
     role: newUser.role,
   };
 
@@ -85,7 +85,7 @@ const refreshToken = async (refreshToken) => {
 
   const user = {
     fullName: decoded.fullName,
-    userName: decoded.userName,
+    username: decoded.username,
     role: decoded.role,
   };
 

@@ -11,7 +11,7 @@ const checkLogin = (req, res, next) => {
 
     const user = {
       fullName: decoded.fullName,
-      userName: decoded.userName,
+      username: decoded.username,
       role: decoded.role,
     };
 
@@ -36,7 +36,7 @@ const checkLogin = (req, res, next) => {
 
       const user = {
         fullName: decoded.fullName,
-        userName: decoded.userName,
+        username: decoded.username,
         role: decoded.role,
       };
 

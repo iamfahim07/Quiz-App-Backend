@@ -4,14 +4,14 @@ const jwt = require("jsonwebtoken");
 /**
  * Generates new access and refresh tokens for a user.
  * @param {Object} user - The user object.
- * @param {string} user.userName - The user name.
+ * @param {string} user.username - The user name.
  * @returns {Object} - An object containing the generated token and refresh token.
  */
 const getNewTokens = (user) => {
   const accessToken = jwt.sign(
     {
       fullName: user.fullName,
-      userName: user.userName,
+      username: user.username,
       role: user.role,
       type: "access",
     },
@@ -24,7 +24,7 @@ const getNewTokens = (user) => {
   const refreshToken = jwt.sign(
     {
       fullName: user.fullName,
-      userName: user.userName,
+      username: user.username,
       role: user.role,
       type: "refresh",
     },
